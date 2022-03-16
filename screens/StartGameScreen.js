@@ -6,15 +6,19 @@ import {
 	Button,
 	TouchableWithoutFeedback,
 	Keyboard,
+	Alert,
 } from 'react-native';
 import Card from '../components/Card';
 import Input from '../components/Input';
+import NumberContainer from '../components/NumberContainer';
 import Colors from '../constants/colors';
+import BodyText from "../components/BodyText";
+import MainButton from "../components/MainButton";
 
-const StartGameScreen = () => {
+const StartGameScreen = (props) => {
 	const [enteredValue, setEnteredValue] = useState('');
 	const [confirmed, setConfirmed] = useState(false);
-	const [selectedNumber, setSelectedNumber] = useState(second);
+	const [selectedNumber, setSelectedNumber] = useState('');
 
 	const numberInputHandler = (inputText) => {
 		setEnteredValue(inputText.replace(/[^0-9]/g, ''));
@@ -27,30 +31,43 @@ const StartGameScreen = () => {
 
 	const confirmInputHandler = () => {
 		const chosenNumber = parseInt(enteredValue);
-		if (chosenNumber === NaN || chosenNumber <= 0 || chosenNumber > 99) {
+		if (isNaN(chosenNumber) || chosenNumber <= 0 || chosenNumber > 99) {
+			Alert.alert(
+				'Invalid number!',
+				'Number has to be a number between 1 and 99.',
+				[{ text: 'Okay', style: 'destructive', onPress: resetInputHandler }]
+			);
 			return;
 		}
 		setConfirmed(true);
 		setSelectedNumber(chosenNumber);
 		setEnteredValue('');
+		Keyboard.dismiss();
 	};
 
 	let confirmedOutput;
 
-	if(confirmed){
-		confirmedOutput = <Text>Chosen Number: {selectedNumber}</Text>
+	if (confirmed) {
+		confirmedOutput = (
+			<Card style={styles.confirmedSummary}>
+				<Text>You Selected</Text>
+				<NumberContainer>{selectedNumber}</NumberContainer>
+				<MainButton
+					onPress={() => props.onStartGame(selectedNumber)}
+				>Start Game</MainButton>
+			</Card>
+		);
 	}
-
 	return (
 		<TouchableWithoutFeedback
 			onPress={() => {
-				keyboard.dismiss();
+				Keyboard.dismiss();
 			}}
 		>
 			<View style={styles.screen}>
 				<Text style={styles.title}>Start a new Game</Text>
 				<Card style={styles.inputContainer}>
-					<Text>Select a Number</Text>
+					<BodyText>Select a Number</BodyText>
 					<Input
 						style={styles.input}
 						bluronSubmit
@@ -93,6 +110,7 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 20,
 		marginVertical: 10,
+		fontFamily: 'open-regular',
 	},
 	inputContainer: {
 		width: 300,
@@ -111,6 +129,10 @@ const styles = StyleSheet.create({
 	input: {
 		width: 50,
 		textAlign: 'center',
+	},
+	confirmedSummary: {
+		marginTop: 20,
+		alignItems: 'center',
 	},
 });
 
