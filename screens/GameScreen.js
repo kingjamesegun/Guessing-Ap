@@ -4,8 +4,9 @@ import {
 	Text,
 	StyleSheet,
 	Button,
-	Alertv,
+	Alert,
 	ScrollView,
+	FlatList,
 } from 'react-native';
 import NumberContainer from '../components/NumberContainer';
 import Card from '../components/Card';
@@ -21,18 +22,27 @@ const generateRandomBetween = (min, max, exclude) => {
 	}
 	return rndNum;
 };
+
+const renderListItem = (listLength, itemData) => (
+	<View style={styles.listItem}>
+		<Text>#{listLength - itemData.index}</Text>
+		<Text>{itemData.item}</Text>
+	</View>
+);
+
 const GameScreen = (props) => {
 	const initialState = generateRandomBetween(1, 100, userChoice);
-	const { userChoice, onGameOver } = props;
-	const [pastGuesses, setPastGuesses] = useState(initialState);
 	const [currentGuess, setcurrentGuess] = useState(initialState);
+	const [pastGuesses, setPastGuesses] = useState([initialState.toString()]);
+
+	const { userChoice, onGameOver } = props;
 
 	const currentLow = useRef(1);
 	const currentHigh = useRef(100);
 
 	useEffect(() => {
 		if (currentGuess === userChoice) {
-			onGameOver(rounds);
+			onGameOver(pastGuesses.length);
 		}
 	}, [currentGuess, userChoice, onGameOver]);
 
@@ -59,7 +69,10 @@ const GameScreen = (props) => {
 
 		setcurrentGuess(nextNumber);
 		// setRounds((curRounds) => curRounds + 1);
-		setPastGuesses((curPastGuesses) => [nextNumber, ...curPastGuesses]);
+		setPastGuesses((curPastGuesses) => [
+			nextNumber.toString(),
+			...curPastGuesses,
+		]);
 	};
 
 	return (
@@ -76,13 +89,17 @@ const GameScreen = (props) => {
 				</MainButton>
 			</Card>
 
-			<ScrollView>
-				{pastGuesses.map((guess) => (
-					<View key={guess}>
-						<Text>{guess}</Text>
-					</View>
-				))}
-			</ScrollView>
+			<View style={styles.listContainer}>
+				{/* <ScrollView contentContainerStyle={styles.list}>
+					{pastGuesses.map((guess, index) => renderListItem(guess, pastGuesses.length - index))}
+				</ScrollView> */}
+				<FlatList
+					keyExtractor={(item) => item}
+					data={pastGuesses}
+					renderItem={renderListItem.bind(this, pastGuesses.length)}
+					contentContainerStyle={styles.list}
+				/>
+			</View>
 		</View>
 	);
 };
@@ -99,6 +116,25 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		width: 300,
 		maxWidth: '80%',
+	},
+	listContainer: {
+		flex: 1,
+		width: '60%',
+	},
+	list: {
+		flexGrow: 1,
+		// alignItems: 'center',
+		justifyContent: 'flex-end',
+	},
+	listItem: {
+		borderColor: '#ccc',
+		borderWidth: 1,
+		padding: 15,
+		marginVertical: 10,
+		backgroundColor: 'white',
+		flexDirection: 'row',
+		justifyContent: 'space-around',
+		width: '100%',
 	},
 });
 
