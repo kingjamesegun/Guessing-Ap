@@ -3,10 +3,10 @@ import {
 	View,
 	Text,
 	StyleSheet,
-	Button,
 	Alert,
-	ScrollView,
 	FlatList,
+	Dimensions,
+	ScrollView,
 } from 'react-native';
 import NumberContainer from '../components/NumberContainer';
 import Card from '../components/Card';
@@ -74,6 +74,33 @@ const GameScreen = (props) => {
 			...curPastGuesses,
 		]);
 	};
+	if (Dimensions.get('window').height < 500) {
+		<View style={styles.screen}>
+			<Text>Opponent's Guess</Text>
+			<NumberContainer>{currentGuess}</NumberContainer>
+			{/* the strings, lower and the greater are the second paramter of the bind function, which is the argument passed to nextGuessHandler */}
+			<View style={styles.controls}>
+				<MainButton onPress={nextGuessHandler.bind(this, 'lower')}>
+					<Ionicons name='md-remove' size={24} color='white' />
+				</MainButton>
+				<MainButton onPress={nextGuessHandler.bind(this, 'greater')}>
+					<Ionicons name='md-add' size={24} color='white' />
+				</MainButton>
+			</View>
+
+			<View style={styles.listContainer}>
+				{/* <ScrollView contentContainerStyle={styles.list}>
+					{pastGuesses.map((guess, index) => renderListItem(guess, pastGuesses.length - index))}
+				</ScrollView> */}
+				<FlatList
+					keyExtractor={(item) => item}
+					data={pastGuesses}
+					renderItem={renderListItem.bind(this, pastGuesses.length)}
+					contentContainerStyle={styles.list}
+				/>
+			</View>
+		</View>;
+	}
 
 	return (
 		<View style={styles.screen}>
@@ -113,13 +140,19 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		justifyContent: 'space-around',
-		marginTop: 20,
+		marginTop: Dimensions.get('window').height > 600 ? 20 : 10,
 		width: 300,
 		maxWidth: '80%',
 	},
 	listContainer: {
 		flex: 1,
 		width: '60%',
+	},
+	controls:{
+		flexDirection: "row",
+		justifyContent: 'space-around',
+		alignItems: 'center',
+		width: '80%'
 	},
 	list: {
 		flexGrow: 1,
